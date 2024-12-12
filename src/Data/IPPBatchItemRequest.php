@@ -11,7 +11,7 @@ namespace QuickBooksOnline\API\Data;
 class IPPBatchItemRequest
 	{
 
-		/**                                                                       
+    /**
 		* Initializes this object, optionally with pre-defined property values    
 		*                                                                         
 		* Initializes this object and it's property members, using the dictionary
@@ -91,6 +91,11 @@ class IPPBatchItemRequest
 	 * @var string
 	 */
 	public $optionsData;
+
+    /**
+     * @var true
+     */
+    public bool $operationSpecified;
 
 
 } // end class IPPBatchItemRequest
