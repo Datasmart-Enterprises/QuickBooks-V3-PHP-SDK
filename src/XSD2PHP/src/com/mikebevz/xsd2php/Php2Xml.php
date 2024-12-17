@@ -230,7 +230,7 @@ class Php2Xml extends Common
                 //print_r("Value is object \n");
                 $el = $this->parseObjectValue($docs['value'], $el);
             } elseif (is_string($docs['value'])) {
-                if ($docs['xmlType'] == 'attribute') {
+                if (array_key_exists('xmlType', $docs) && $docs['xmlType'] === 'attribute') {
                     $atr = $this->dom->createAttribute($docs['xmlName']);
                     $text = $this->dom->createTextNode($docs['value']);
                     $atr->appendChild($text);
