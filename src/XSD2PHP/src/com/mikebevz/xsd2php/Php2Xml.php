@@ -293,42 +293,44 @@ class Php2Xml extends Common
                 // end
 
                 if ($prop->getValue($obj) != '') {
-                    if ($propDocs['xmlType'] == 'element') {
-                        $el = '';
-                        $code = $this->getNsCode($propDocs['xmlNamespace']);
-                        $value = $prop->getValue($obj);
+                    if (array_key_exists('xmpType', $propDocs)) {
+                        if ($propDocs['xmlType'] === 'element') {
+                            $el = '';
+                            $code = $this->getNsCode($propDocs['xmlNamespace']);
+                            $value = $prop->getValue($obj);
 
-                        if (is_array($value)) {
+                            if (is_array($value)) {
 
-                            // Strip the class prefix, if one exists
-                            if ($this->classPrefix && (0===strpos($propDocs['xmlName'], $this->classPrefix))) {
-                                $propDocs['xmlName'] = substr($propDocs['xmlName'], strlen($this->classPrefix));
+                                // Strip the class prefix, if one exists
+                                if ($this->classPrefix && (0===strpos($propDocs['xmlName'], $this->classPrefix))) {
+                                    $propDocs['xmlName'] = substr($propDocs['xmlName'], strlen($this->classPrefix));
+                                }
+
+                                $this->logger->debug("Creating element:".$code.":".$propDocs['xmlName']);
+                                $this->logger->debug(print_r($value, true));
+                                foreach ($value as $node) {
+                                    $this->logger->debug(print_r($node, true));
+                                    $el = $this->dom->createElement($code.":".$propDocs['xmlName']);
+                                    $arrNode = $this->parseObjectValue($node, $el);
+                                    $element->appendChild($arrNode);
+                                }
+                            } else {
+                                //SDK-39
+                                $el = $this->dom->createElement($code.":".$propDocs['xmlName'], htmlspecialchars($value));
+                                $element->appendChild($el);
                             }
+                            //print_r("Added element ".$propDocs['xmlName']." with NS = ".$propDocs['xmlNamespace']." \n");
+                        } elseif ($propDocs['xmlType'] === 'attribute') {
+                            $atr = $this->dom->createAttribute($propDocs['xmlName']);
+                            $text = $this->dom->createTextNode($prop->getValue($obj));
+                            $atr->appendChild($text);
+                            $element->appendChild($atr);
+                        } elseif ($propDocs['xmlType'] === 'value') {
+                            $this->logger->debug(print_r($prop->getValue($obj), true));
 
-                            $this->logger->debug("Creating element:".$code.":".$propDocs['xmlName']);
-                            $this->logger->debug(print_r($value, true));
-                            foreach ($value as $node) {
-                                $this->logger->debug(print_r($node, true));
-                                $el = $this->dom->createElement($code.":".$propDocs['xmlName']);
-                                $arrNode = $this->parseObjectValue($node, $el);
-                                $element->appendChild($arrNode);
-                            }
-                        } else {
-                            //SDK-39
-                            $el = $this->dom->createElement($code.":".$propDocs['xmlName'], htmlspecialchars($value));
-                            $element->appendChild($el);
+                            $txtNode = $this->dom->createTextNode($prop->getValue($obj));
+                            $element->appendChild($txtNode);
                         }
-                        //print_r("Added element ".$propDocs['xmlName']." with NS = ".$propDocs['xmlNamespace']." \n");
-                    } elseif ($propDocs['xmlType'] == 'attribute') {
-                        $atr = $this->dom->createAttribute($propDocs['xmlName']);
-                        $text = $this->dom->createTextNode($prop->getValue($obj));
-                        $atr->appendChild($text);
-                        $element->appendChild($atr);
-                    } elseif ($propDocs['xmlType'] == 'value') {
-                        $this->logger->debug(print_r($prop->getValue($obj), true));
-
-                        $txtNode = $this->dom->createTextNode($prop->getValue($obj));
-                        $element->appendChild($txtNode);
                     }
                 }
             }
